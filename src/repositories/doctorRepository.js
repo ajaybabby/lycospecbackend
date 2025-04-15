@@ -44,24 +44,37 @@ const createPatient = async (patientData) => {
 };
 
 const createAppointment = async (appointmentData) => {
+    const currentDate = new Date().toISOString().split('T')[0];
     const [result] = await pool.query(`
-        INSERT INTO appointments (
+        INSERT INTO appointment (
             doctor_id,
             patient_id,
             appointment_date,
-            appointment_time
+            time_slot
         ) VALUES (?, ?, ?, ?)`,
         [
             appointmentData.doctor_id,
             appointmentData.patient_id,
-            appointmentData.appointment_date,
+            currentDate,
             appointmentData.time_slot
         ]
     );
     return result;
 };
 
-
+const getAllAppointments = async () => {
+    const [rows] = await pool.query(`
+        SELECT 
+            a.*,
+            d.name as doctor_name,
+            p.name as patient_name
+        FROM appointment a
+        LEFT JOIN doctor d ON a.doctor_id = d.id
+        LEFT JOIN patient p ON a.patient_id = p.id
+        ORDER BY a.appointment_date, a.time_slot
+    `);
+    return rows;
+};
 
 // Add these new functions to your existing doctorRepository.js
 
@@ -93,5 +106,6 @@ module.exports = {
     getAllDoctors,
     getDoctorById,
     createPatient,
-    createAppointment
+    createAppointment,
+    getAllAppointments    // Add this to exports
 };

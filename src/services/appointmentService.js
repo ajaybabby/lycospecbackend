@@ -1,4 +1,20 @@
 const doctorRepository = require('../repositories/doctorRepository');
+const appointmentRepository = require('../repositories/appointmentRepository');
+
+const getAllAppointments = async () => {
+    try {
+        const appointments = await appointmentRepository.getAllAppointments();
+        return {
+            success: true,
+            data: appointments
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
 
 const bookAppointment = async (bookingData) => {
     try {
@@ -32,5 +48,6 @@ const bookAppointment = async (bookingData) => {
 };
 
 module.exports = {
-    bookAppointment
+    getAllAppointments,
+    bookAppointment // keeping your existing bookAppointment service
 };

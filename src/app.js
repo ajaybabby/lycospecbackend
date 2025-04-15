@@ -10,25 +10,22 @@ const { verifyAdminToken } = require("./middleware/authMiddleware");
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000", // Allow frontend origin
-  credentials: true, // Required for cookies to be sent
+  origin: "http://localhost:3001",
+  credentials: true,
 }));
 
 app.use(express.json());
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // Set to true if using HTTPS
-  })
-);
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
 
-
+// Register routes
+app.use("/api", appointmentRoutes);  // Move this first
 app.use("/api", patientRoutes);
 app.use("/api", doctorRoutes);
-app.use('/api', appointmentRoutes);
-
 
 module.exports = app;

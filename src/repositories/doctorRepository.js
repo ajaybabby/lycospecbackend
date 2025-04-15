@@ -63,6 +63,32 @@ const createAppointment = async (appointmentData) => {
 
 
 
+// Add these new functions to your existing doctorRepository.js
+
+const getDoctorByEmail = async (email) => {
+    const [rows] = await pool.query(`
+        SELECT * FROM doctor WHERE email = ?`,
+        [email]
+    );
+    return rows[0];
+};
+
+const getFullDoctorDetails = async (doctorId) => {
+    const [rows] = await pool.query(`
+        SELECT 
+            d.*,
+            h.name as hospital_name,
+            h.area as area_name,
+            s.name as specialization_name
+        FROM doctor d
+        LEFT JOIN hospital h ON d.hospital_id = h.id
+        LEFT JOIN specialization s ON d.specialization_id = s.id
+        WHERE d.id = ?`,
+        [doctorId]
+    );
+    return rows[0];
+};
+
 module.exports = {
     getAllDoctors,
     getDoctorById,

@@ -5,6 +5,7 @@ const session = require("express-session");
 const doctorRoutes = require("./routes/doctorRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const otpRoutes = require('./routes/otpRoutes');
 const { verifyAdminToken } = require("./middleware/authMiddleware");
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(
 app.use("/api", patientRoutes);
 app.use("/api", doctorRoutes);
 app.use('/api', appointmentRoutes);
+app.use('/api', otpRoutes);
 
 
 module.exports = app;

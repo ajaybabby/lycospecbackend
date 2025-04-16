@@ -30,16 +30,16 @@ const sendOTP = async (req, res) => {
 
 const verifyOTPAndLogin = async (req, res) => {
     try {
-        const { doctorId, otp } = req.body;
+        const { email, otp } = req.body;
 
-        if (!doctorId || !otp) {
+        if (!email || !otp) {
             return res.status(400).json({
                 success: false,
-                error: 'Doctor ID and OTP are required'
+                error: 'Email and OTP are required'
             });
         }
 
-        const result = await otpService.verifyOTPAndLogin(doctorId, otp);
+        const result = await otpService.verifyOTPAndLogin(email, otp);
 
         if (!result.success) {
             return res.status(400).json(result);

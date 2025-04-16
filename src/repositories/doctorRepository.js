@@ -76,13 +76,8 @@ const getAllAppointments = async () => {
     return rows;
 };
 
-// Add these new functions to your existing doctorRepository.js
-
 const getDoctorByEmail = async (email) => {
-    const [rows] = await pool.query(`
-        SELECT * FROM doctor WHERE email = ?`,
-        [email]
-    );
+    const [rows] = await pool.query('SELECT * FROM doctor WHERE email = ?', [email]);
     return rows[0];
 };
 
@@ -102,10 +97,35 @@ const getFullDoctorDetails = async (doctorId) => {
     return rows[0];
 };
 
+const verifyOTPInDB = async (email, otp) => {
+    const [rows] = await pool.query(
+        `SELECT * FROM otp_verification 
+        WHERE email = ? 
+        AND otp = ? 
+        AND expires_at > NOW() 
+        AND is_verified = FALSE 
+        ORDER BY created_at DESC 
+        LIMIT 1`,
+        [email, otp]
+    );
+
+    if (rows.length > 0) {
+        await pool.query(
+            'UPDATE otp_verification SET is_verified = TRUE WHERE id = ?',
+            [rows[0].id]
+        );
+        return true;
+    }
+    return false;
+};
+
 module.exports = {
     getAllDoctors,
     getDoctorById,
     createPatient,
     createAppointment,
-    getAllAppointments    // Add this to exports
+    getAllAppointments,
+    getDoctorByEmail,
+    getFullDoctorDetails,
+    verifyOTPInDB   // Add this to exports
 };

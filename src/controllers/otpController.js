@@ -2,17 +2,26 @@ const otpService = require('../services/otpService');
 
 const sendOTP = async (req, res) => {
     try {
-        const { contact } = req.body;
+        const { email, userType } = req.body;
 
-        if (!contact) {
+        if (!email || !userType) {
             return res.status(400).json({
                 success: false,
-                error: 'Email is required'
+                error: 'Email and user type are required'
             });
         }
-        const email = contact;
 
-        const result = await otpService.sendOTPToDoctor(email);
+        let result;
+        if (userType === 'doctor') {
+            result = await otpService.sendOTPToDoctor(email);
+        } else if (userType === 'patient') {
+            result = await otpService.sendOTPToPatient(email);
+        } else {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user type'
+            });
+        }
         
         if (!result.success) {
             return res.status(400).json(result);
@@ -30,16 +39,26 @@ const sendOTP = async (req, res) => {
 
 const verifyOTPAndLogin = async (req, res) => {
     try {
-        const { email, otp } = req.body;
+        const { email, otp, userType } = req.body;
 
-        if (!email || !otp) {
+        if (!email || !otp || !userType) {
             return res.status(400).json({
                 success: false,
-                error: 'Email and OTP are required'
+                error: 'Email, OTP, and user type are required'
             });
         }
 
-        const result = await otpService.verifyOTPAndLogin(email, otp);
+        let result;
+        if (userType === 'doctor') {
+            result = await otpService.verifyOTPAndLogin(email, otp);
+        } else if (userType === 'patient') {
+            result = await otpService.verifyPatientOTPAndLogin(email, otp);
+        } else {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user type'
+            });
+        }
 
         if (!result.success) {
             return res.status(400).json(result);

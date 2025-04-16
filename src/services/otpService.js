@@ -1,30 +1,87 @@
 const pool = require('../config/db');
 const nodemailer = require('nodemailer');
 const doctorRepository = require('../repositories/doctorRepository');
+const otpRepository = require('../repositories/otpRepository');
 
 const generateOTP = () => {
-    // Generate a 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    return otp.toString();
+    return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+const sendOTPToPatient = async (email) => {
+    try {
+        const otp = generateOTP();
+        const expiryTime = new Date(Date.now() + 5 * 60000); // 5 minutes expiry
+
+        // Save OTP in database
+        await otpRepository.savePatientOTP(email, otp, expiryTime);
+
+        // Send email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Your OTP for Patient Verification',
+            text: `Your OTP is: ${otp}. Valid for 5 minutes.`
+        });
+
+        return {
+            success: true,
+            message: 'OTP sent successfully'
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
     }
-});
+};
 
-const sendEmailOTP = async (email, otp) => {
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Login OTP',
-        text: `Your OTP is: ${otp}`
-    };
 
-    return await transporter.sendMail(mailOptions);
+const verifyPatientOTPAndLogin = async (email, otp) => {
+    try {
+        const otpRecord = await otpRepository.getPatientOTP(email);
+        
+        if (!otpRecord) {
+            return {
+                success: false,
+                error: 'No OTP found for this email'
+            };
+        }
+
+        if (otpRecord.otp !== otp) {
+            return {
+                success: false,
+                error: 'Invalid OTP'
+            };
+        }
+
+        if (new Date() > new Date(otpRecord.expiry_time)) {
+            return {
+                success: false,
+                error: 'OTP has expired'
+            };
+        }
+
+        // Delete used OTP
+        await otpRepository.deletePatientOTP(email);
+
+        return {
+            success: true,
+            message: 'OTP verified successfully'
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 };
 
 const sendOTPToDoctor = async (email) => {
@@ -39,7 +96,21 @@ const sendOTPToDoctor = async (email) => {
         }
 
         const otp = generateOTP();
-        await sendEmailOTP(email, otp);
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Your OTP for Doctor Verification',
+            text: `Your OTP is: ${otp}. Valid for 5 minutes.`
+        });
         await createOTPRecord(email, otp); // Changed to use email instead of doctor.id
 
         return {
@@ -107,5 +178,7 @@ const verifyOTP = async (email, otp) => {
 
 module.exports = {
     sendOTPToDoctor,
-    verifyOTPAndLogin
+    verifyOTPAndLogin,
+    sendOTPToPatient,
+    verifyPatientOTPAndLogin
 };

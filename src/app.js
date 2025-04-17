@@ -7,11 +7,12 @@ const patientRoutes = require("./routes/patientRoutes");
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const otpRoutes = require('./routes/otpRoutes');
 const { verifyAdminToken } = require("./middleware/authMiddleware");
+const videoCallRoutes = require('./routes/videoCallRoutes');
 
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "*",
   credentials: true,
 }));
 
@@ -25,11 +26,10 @@ app.use(session({
 }));
 
 // Register routes
-app.use("/api", appointmentRoutes);  // Move this first
-app.use("/api", patientRoutes);
 app.use("/api", doctorRoutes);
-app.use('/api', appointmentRoutes);
+app.use("/appoint", appointmentRoutes);
+app.use("/api", patientRoutes);
 app.use('/api', otpRoutes);
-
+app.use('/api', videoCallRoutes);  // Add video call routes
 
 module.exports = app;

@@ -36,7 +36,23 @@ const getDoctorById = async (id) => {
     }
 };
 
+const getVideoEnabledDoctors = async () => {
+    try {
+        const doctors = await doctorRepository.getVideoEnabledDoctors();
+        return {
+            success: true,
+            data: doctors
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 module.exports = {
     getAllDoctors,
-    getDoctorById
+    getDoctorById,
+    getVideoEnabledDoctors
 };

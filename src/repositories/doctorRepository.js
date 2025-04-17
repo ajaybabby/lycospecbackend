@@ -119,6 +119,21 @@ const verifyOTPInDB = async (email, otp) => {
     return false;
 };
 
+const getVideoEnabledDoctors = async () => {
+    const [rows] = await pool.query(`
+        SELECT 
+            d.*,
+            h.name as hospital_name,
+            s.name as specialization_name
+        FROM doctor d
+        LEFT JOIN hospital h ON d.hospital_id = h.id
+        LEFT JOIN specialization s ON d.specialization_id = s.id
+        WHERE d.video_enabled = 'yes'
+        ORDER BY d.name
+    `);
+    return rows;
+};
+
 module.exports = {
     getAllDoctors,
     getDoctorById,
@@ -127,5 +142,7 @@ module.exports = {
     getAllAppointments,
     getDoctorByEmail,
     getFullDoctorDetails,
-    verifyOTPInDB   // Add this to exports
+    verifyOTPInDB  ,
+    getVideoEnabledDoctors
+    // Add this to exports
 };

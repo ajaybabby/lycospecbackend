@@ -31,7 +31,23 @@ const getDoctorById = async (req, res) => {
     }
 };
 
+const getVideoEnabledDoctors = async (req, res) => {
+    try {
+        const result = await doctorService.getVideoEnabledDoctors();
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+};
+
 module.exports = {
     getAllDoctors,
-    getDoctorById
+    getDoctorById,
+    getVideoEnabledDoctors
 };

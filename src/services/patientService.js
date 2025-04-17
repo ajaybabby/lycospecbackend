@@ -2,27 +2,23 @@ const patientRepository = require('../repositories/patientRepository');
 
 const registerPatient = async (patientData) => {
     try {
-        // Validate aadhar format
-        if (!/^\d{12}$/.test(patientData.aadhar)) {
+        // Check if patient already exists
+        const existingPatient = await patientRepository.getPatientByPhone(patientData.phone);
+        if (existingPatient) {
             return {
                 success: false,
-                error: 'Invalid Aadhar number format'
+                error: 'Patient with this phone number already exists'
             };
         }
 
-        // Validate email format
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patientData.email)) {
-            return {
-                success: false,
-                error: 'Invalid email format'
-            };
-        }
-
-        const result = await patientRepository.createPatient(patientData);
+        // Create new patient
+        const patientId = await patientRepository.createPatient(patientData);
+        
         return {
             success: true,
+            message: 'Patient registered successfully',
             data: {
-                id: result.insertId,
+                id: patientId,
                 ...patientData
             }
         };

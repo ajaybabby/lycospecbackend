@@ -16,6 +16,21 @@ const getAllAppointments = async () => {
     }
 };
 
+const getAppointmentsByDoctorId = async (doctorId) => {
+    try {
+        const appointments = await appointmentRepository.getAppointmentsByDoctorId(doctorId);
+        return {
+            success: true,
+            data: appointments
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 const bookAppointment = async (bookingData) => {
     try {
         
@@ -49,5 +64,7 @@ const bookAppointment = async (bookingData) => {
 
 module.exports = {
     getAllAppointments,
-    bookAppointment // keeping your existing bookAppointment service
+    bookAppointment,
+    getAppointmentsByDoctorId
+    // keeping your existing bookAppointment service
 };

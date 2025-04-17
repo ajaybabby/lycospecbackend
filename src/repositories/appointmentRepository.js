@@ -16,6 +16,23 @@ const getAllAppointments = async () => {
     return rows;
 };
 
+const getAppointmentsByDoctorId = async (doctorId) => {
+    const [rows] = await pool.query(`
+        SELECT 
+            a.*,
+            p.name as patient_name,
+            p.age as patient_age,
+            p.gender as patient_gender,
+            p.phone as patient_phone
+        FROM appointment a
+        LEFT JOIN patient p ON a.patient_id = p.id
+        WHERE a.doctor_id = ?
+        ORDER BY a.appointment_date DESC, a.time_slot ASC
+    `, [doctorId]);
+    return rows;
+};
+
 module.exports = {
-    getAllAppointments
+    getAllAppointments,
+    getAppointmentsByDoctorId
 };

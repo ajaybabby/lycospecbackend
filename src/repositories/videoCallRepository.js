@@ -30,8 +30,25 @@ const updateCallStatus = async (id, status) => {
     return result.affectedRows > 0;
 };
 
+const getDoctorVideoRequests = async (doctorId) => {
+    const [rows] = await pool.query(
+        `SELECT 
+            vcr.*,
+            p.name as patient_name,
+            p.age as patient_age,
+            p.gender as patient_gender
+        FROM video_call_requests vcr
+        JOIN patient p ON vcr.patient_id = p.id
+        WHERE vcr.doctor_id = ?
+        ORDER BY vcr.request_time DESC`,
+        [doctorId]
+    );
+    return rows;
+};
+
 module.exports = {
     createVideoCallRequest,
     getVideoCallRequest,
-    updateCallStatus
+    updateCallStatus,
+    getDoctorVideoRequests
 };

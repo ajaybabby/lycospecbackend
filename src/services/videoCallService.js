@@ -39,7 +39,23 @@ const updateCallStatus = async (callId, status) => {
     }
 };
 
+const getDoctorVideoRequests = async (doctorId) => {
+    try {
+        const requests = await videoCallRepository.getDoctorVideoRequests(doctorId);
+        return {
+            success: true,
+            data: requests
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 module.exports = {
     requestVideoCall,
-    updateCallStatus
+    updateCallStatus,
+    getDoctorVideoRequests
 };

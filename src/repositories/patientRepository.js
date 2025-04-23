@@ -13,7 +13,16 @@ const getPatientByPhone = async (phone) => {
     return rows[0];
 };
 
+const getPatientByEmail = async (email) => {
+    const [rows] = await pool.query(
+        'SELECT * FROM patient WHERE email = ?',
+        [email]
+    );
+    return rows[0];
+};
+
 module.exports = {
     createPatient,
-    getPatientByPhone
+    getPatientByPhone,
+    getPatientByEmail
 };

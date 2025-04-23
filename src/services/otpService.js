@@ -2,6 +2,8 @@ const pool = require('../config/db');
 const nodemailer = require('nodemailer');
 const doctorRepository = require('../repositories/doctorRepository');
 const otpRepository = require('../repositories/otpRepository');
+const patientRepository = require('../repositories/patientRepository');
+const jwt = require('jsonwebtoken');
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -113,9 +115,32 @@ const verifyPatientOTPAndLogin = async (email, otp) => {
         // Delete used OTP
         await otpRepository.deletePatientOTP(email);
 
+        // Get patient details
+        const patient = await patientRepository.getPatientByEmail(email);
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                email: email,
+                userType: 'patient',
+                patientId: patient.id
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
         return {
             success: true,
-            message: 'OTP verified successfully'
+            message: 'OTP verified successfully',
+            token: token,
+            userType: 'patient',
+            data: {
+                id: patient.id,
+                name: patient.name,
+                email: patient.email,
+                age: patient.age,
+                gender: patient.gender
+            }
         };
     } catch (error) {
         return {

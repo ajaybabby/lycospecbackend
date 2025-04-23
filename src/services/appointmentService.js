@@ -33,12 +33,17 @@ const getAppointmentsByDoctorId = async (doctorId) => {
 
 const bookAppointment = async (bookingData) => {
     try {
-        
+        let patientId;
 
-        // Create patient first
-        const patientId = await doctorRepository.createPatient(bookingData);
+        // If patient_id is provided, use it; otherwise create new patient
+        if (bookingData.patient_id) {
+            patientId = bookingData.patient_id;
+        } else {
+            // Create patient only if patient_id is not provided
+            patientId = await doctorRepository.createPatient(bookingData);
+        }
 
-        // Create appointment with the new patient ID
+        // Create appointment with the patient ID
         const appointmentData = {
             ...bookingData,
             patient_id: patientId

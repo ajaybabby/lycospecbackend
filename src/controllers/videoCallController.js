@@ -79,8 +79,27 @@ const getDoctorVideoRequests = async (req, res) => {
     }
 };
 
+const acceptVideoCall = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await videoCallService.acceptVideoCall(id);
+        
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+};
+
 module.exports = {
     requestVideoCall,
     updateCallStatus,
-    getDoctorVideoRequests
+    getDoctorVideoRequests,
+    acceptVideoCall
 };

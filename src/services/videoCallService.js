@@ -54,8 +54,56 @@ const getDoctorVideoRequests = async (doctorId) => {
     }
 };
 
+const acceptVideoCall = async (callId) => {
+    try {
+        const call = await videoCallRepository.getVideoCallById(callId);
+        
+        if (!call) {
+            return {
+                success: false,
+                error: 'Video call request not found'
+            };
+        }
+
+        if (call.status !== 'pending') {
+            return {
+                success: false,
+                error: 'Can only accept pending calls'
+            };
+        }
+
+        const actionTime = new Date();
+        const updated = await videoCallRepository.updateCallStatus(callId, 'accepted', actionTime);
+        
+        if (!updated) {
+            return {
+                success: false,
+                error: 'Failed to update call status'
+            };
+        }
+
+        return {
+            success: true,
+            message: 'Video call accepted successfully',
+            data: {
+                callId: callId,
+                status: 'accepted',
+                acceptedAt: actionTime,
+                doctorName: call.doctor_name,
+                patientName: call.patient_name
+            }
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 module.exports = {
     requestVideoCall,
     updateCallStatus,
-    getDoctorVideoRequests
+    getDoctorVideoRequests,
+    acceptVideoCall
 };

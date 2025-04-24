@@ -101,9 +101,41 @@ const acceptVideoCall = async (callId) => {
     }
 };
 
+const getCallStatus = async (callId) => {
+    try {
+        const call = await videoCallRepository.getVideoCallById(callId);
+        
+        if (!call) {
+            return {
+                success: false,
+                error: 'Video call request not found'
+            };
+        }
+
+        return {
+            success: true,
+            data: {
+                callId: call.id,
+                status: call.status,
+                doctorName: call.doctor_name,
+                patientName: call.patient_name,
+                requestTime: call.request_time,
+                callStartTime: call.call_start_time,
+                callEndTime: call.call_end_time
+            }
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 module.exports = {
     requestVideoCall,
     updateCallStatus,
     getDoctorVideoRequests,
-    acceptVideoCall
+    acceptVideoCall,
+    getCallStatus
 };
